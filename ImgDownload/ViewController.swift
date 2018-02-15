@@ -99,7 +99,6 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     func configImage() {
         imageView.frame = CGRect(x: 10, y: 9*xHeight, width: vcWidth-20, height: 5*xHeight)
-//        imageView.image = UIImage(named: "karl.png")
         imageView.contentMode = .scaleAspectFit
         self.view.addSubview(imageView)
     }
@@ -114,48 +113,6 @@ class ViewController: UIViewController, UITextFieldDelegate {
 //        print(passwordD!)
         clearTextFields()
         
-//        let username = "moravek"
-//        let password = "jan"
-//        let loginString = String(format: "username=%@", username)
-//        let loginUTF8 = loginString.data(using: String.Encoding.utf8)!
-//        let sha1password = password.sha1()
-
-//        print("sha1:")
-//        print(sha1password)
-//        print("loginUTF8:")
-//        print(loginUTF8)
-        
-//        let body = ["username":"moravek"]
-//        let bodyData: Data = NSKeyedArchiver.archivedData(withRootObject: body)
-//
-//        let url = URL(string: "https://mobility.cleverlance.com/download/bootcamp/image.php")!
-//        var request = URLRequest(url: url)
-//        request.httpMethod = "POST"
-//        request.setValue(sha1password, forHTTPHeaderField: "Authorization")
-//        request.httpBody = bodyData
-//
-//        print(request)
-//
-//        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-//            print("*******************")
-////            print(NSString(data: request.httpBody!, encoding: String.Encoding.utf8.rawValue)!)
-//            print(request.httpBody)
-//            print(request.)
-//
-//            print("*******************")
-//            guard let imageData = data, error == nil else { return }
-//            DispatchQueue.main.async() {
-//                print("img")
-//
-//                if let decodedData = Data(base64Encoded: imageData, options: .ignoreUnknownCharacters) {
-//                    self.imageView.image = UIImage(data: decodedData)
-//                }
-//            }
-//        }
-//
-//        task.resume()
-        
-
         let password = "jan"
         let passwordSHA1 = password.sha1()
         let login = "moravek"
@@ -180,48 +137,42 @@ class ViewController: UIViewController, UITextFieldDelegate {
                 print("httpResponse:")
                 print(httpResponse!)
                 
-                guard let imageData = data, error == nil else { return }
-                    DispatchQueue.main.async() {
-                        print(imageData)
-    
-                        if let decodedData = Data(base64Encoded: imageData, options: .ignoreUnknownCharacters) {
-                            print(decodedData)
-                            self.imageView.image = UIImage(data: decodedData)
+                guard let imageData: Data = data, error == nil else { return }
+                
+                DispatchQueue.main.async() {
+                    
+                    let imageJSON = try? JSONSerialization.jsonObject(with: imageData, options: [])
+                    
+                    if let imageDictionary = imageJSON as? [String: Any] {
+                        if let imageRaw = imageDictionary["image"] as? String {
+                            print(imageRaw)
+                            
+                            let dataDecoded : Data = Data(base64Encoded: imageRaw, options: .ignoreUnknownCharacters)!
+                            self.imageView.image = UIImage(data: dataDecoded)
                         }
-                        
-                        
+                    }
                 }
             }
         })
 
         dataTask.resume()
 
-
     }
-    
     
     @objc func loginTextFieldValueChanged(_ sender: UITextField) {
         if let text = sender.text, !text.isEmpty
-        {
-            loginD = sender.text!
-        }
+        {loginD = sender.text!}
     }
     
     @objc func passwordTextFieldValueChanged(_ sender: UITextField) {
         if let text = sender.text, !text.isEmpty
-        {
-            passwordD = sender.text!
-        }
+        {passwordD = sender.text!}
     }
     
     func clearTextFields() {
         loginTextField.text = ""
         passwordTextField.text = ""
     }
-
-    
-    
-    
 
 }
 
@@ -236,5 +187,3 @@ extension String {
         return hexBytes.joined()
     }
 }
-
-
